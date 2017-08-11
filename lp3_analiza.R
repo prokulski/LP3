@@ -1,23 +1,34 @@
+# Skrypt z danych zgromadzonych przez get_lp3_data.R przygotowuje serie wykresow i tabelek
+# Pobiera tez tagi z LastFM dla poszczegolnych utworow
+
+
+lastkey <- "43771275a50f206cf4a201256eec49fb" # wpisz SWÓJ!
+
 library(tidyverse)
 library(lubridate)
 
 library(ggrepel) # dla ładnego umiejscowienia labelek na wykresach
 
+
+# dane zapisane w wyniku działania skryptu pobierajcego dane
 notowania <- readRDS("notowania_raw.RDS")
 
 notowania_analiza <- notowania %>%
-  mutate(NotowanieData = make_date(NotowanieRok,
-                                   NotowanieMiesiac,
-                                   NotowanieDzien)) %>%
+  # zostawiamy tylko potrzebne kolumny
   select(PozAkt, Artist, Title, NotowanieNumer, NotowanieData, NotowanieProwadzacy, Kraj) %>%
+  # nadanie punktacji
   filter(PozAkt <= 30) %>%
   mutate(Punkty = 31-PozAkt)
 
 
-# prowadzący notowania
+
+#### PROWADZĄCY NOTOWANIA ####
+
+# prowadzący kolejne notowania
 prowadzacy <- notowania_analiza %>%
   select(NotowanieData, NotowanieProwadzacy) %>%
   distinct()
+
 
 # kto ile notowań prowadził?
 prowadzacy %>%
@@ -28,10 +39,8 @@ prowadzacy %>%
   mutate(Prowadzacy=factor(NotowanieProwadzacy, levels=NotowanieProwadzacy)) %>%
   ggplot() +
   geom_bar(aes(Prowadzacy, n), stat="identity", fill = "lightgreen", color = "black") +
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  labs(title = "Kto i jak dużo notowań LP3 prowadził?",
-       x = "", y = "Liczba notowań",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+
 
 # podział notowań w roku pomiędzy osoby
 prowadzacy %>%
@@ -44,10 +53,11 @@ prowadzacy %>%
   ungroup() %>%
   ggplot() +
   geom_bar(aes(Rok, p, fill=NotowanieProwadzacy), stat="identity", color = "black") +
-  theme(legend.position = "bottom") +
-  labs(title = "Kto i jaką część notowań LP3 prowadził?",
-       x = "", y = "% notowań", fill = "Prowadzący",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(legend.position = "bottom")
+
+
+
+#### PIOSENKI ####
 
 # najopularniejsze piosenki (top wszechczasów)
 notowania_analiza %>%
@@ -60,10 +70,8 @@ notowania_analiza %>%
   mutate(Song = factor(Song, levels = Song)) %>%
   ggplot() +
   geom_bar(aes(Song, Punkty), stat = "identity", fill = "lightgreen", color = "black") +
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  labs(title = "Hity Listy Przebojów Trójki",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+
 
 # Top 30 polskie
 notowania_analiza %>%
@@ -77,10 +85,8 @@ notowania_analiza %>%
   mutate(Song = factor(Song, levels = Song)) %>%
   ggplot() +
   geom_bar(aes(Song, Punkty), stat="identity", fill = "lightgreen", color = "black") +
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  labs(title = "Polskie hity Listy Przebojów Trójki",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+
 
 # najpopularniejszy artysta całej listy - wszystko
 notowania_analiza %>%
@@ -92,12 +98,10 @@ notowania_analiza %>%
   mutate(Artist = factor(Artist, levels = Artist)) %>%
   ggplot() +
   geom_bar(aes(Artist, Punkty), stat="identity", fill = "lightgreen", color = "black") +
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  labs(title = "Najlepsi wykonawcy na Liście Przebojów Trójki",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(axis.text.x = element_text(angle=90, hjust=1))
 
-# Lista najlepszych artystów
+
+# Lista najlepszych artystów - odczytana z wykresu
 top_artists <- c("U2", "HEY", "KULT", "MADONNA", "DEPECHE MODE",
                  "MAANAM", "COLDPLAY", "LADY PANK", "METALLICA",
                  "REPUBLIKA", "STING", "PEARL JAM")
@@ -114,10 +118,8 @@ notowania_analiza %>%
   mutate(Artist=factor(Artist, levels = Artist)) %>%
   ggplot() +
   geom_bar(aes(Artist, Punkty), stat="identity", fill = "lightgreen", color = "black") +
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  labs(title = "Najlepsi polscy wykonawcy na Liście Przebojów Trójki",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+
 
 
 # Forma artystów na przestrzeni lat
@@ -144,10 +146,7 @@ notowania_analiza %>%
   geom_smooth(aes(Rok, npos, color=Artist),  method = "loess",
               show.legend = FALSE, se = FALSE, size=1, alpha = 0.4) +
   facet_wrap(~Artist) +
-  scale_y_reverse() +
-  labs(title = "Artyści na Liście Przebojów Trójki - zajmowane miejsce w czasie",
-       x = "", y = "Pozycja na liście",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  scale_y_reverse()
 
 
 # najpopularniejsze piosenki w roku - wszystko
@@ -165,10 +164,7 @@ notowania_analiza %>%
   geom_bar(aes(Rok, Punkty), stat="identity", fill = "lightgreen", color = "black") +
   geom_text(aes(Rok, Punkty, label=paste(Artist, Title, sep=" - ")), angle=90,
             hjust = -0.1, vjust = 0.1) +
-  expand_limits(y = c(0, 4000)) +
-  labs(title = "Hity poszczególnych lat na LP3",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  expand_limits(y = c(0, 4000))
 
 
 # najpopularniejsze piosenki w roku - Polska
@@ -187,10 +183,8 @@ notowania_analiza %>%
   geom_bar(aes(Rok, Punkty), stat="identity", color = "black", fill = "lightgreen") +
   geom_text(aes(Rok, Punkty, label=paste(Artist, Title, sep=" - ")),
             angle=90, hjust=-0.1, vjust=0.1) +
-  expand_limits(y = c(0, 3000)) +
-  labs(title = "Polskie hity poszczególnych lat na LP3",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  expand_limits(y = c(0, 3000))
+
 
 # wynik artysty dla kolejnych notowań
 notowania_analiza %>%
@@ -203,14 +197,11 @@ notowania_analiza %>%
              color = "gray", alpha = 0.4, show.legend = FALSE) +
   geom_smooth(aes(NotowanieData, Punkty),  method = "loess",
               show.legend = FALSE, se = FALSE, size = 1.4, color = "orange") +
-  facet_wrap(~Artist) +
-  labs(title = "Hity Listy Przebojów Trójki",
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  facet_wrap(~Artist)
 
 
 # najpopularniejsze piosenki w danym roku wskazanego artysty
-artysta <- "BUDKA SUFLERA"
+artysta <- "BUDKA SUFLERA"    # ;-)
 
 notowania_analiza %>%
   filter(Artist==artysta) %>%
@@ -229,16 +220,12 @@ notowania_analiza %>%
            color = "black", fill = "lightgreen") +
   geom_text(aes(Rok, Punkty, label=Title),
             angle=90, hjust=-0.1, vjust=0.1) +
-  expand_limits(y = c(0, 900)) +
-  labs(title = paste0(artysta, " - najlepsze piosenki w poszczególnych latach"),
-       x = "", y = "Punkty",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  expand_limits(y = c(0, 900))
+
 
 
 # artysta i jego piosenki na przestrzeni lat
-
 notowania_analiza %>%
-  #   filter(year(NotowanieData) >= 1991, year(NotowanieData) <= 1996) %>%
   filter(Artist %in% top_artists) %>%
   ggplot() +
   geom_line(aes(NotowanieData, PozAkt, color=Title, group=Title)) +
@@ -247,6 +234,8 @@ notowania_analiza %>%
   facet_wrap(~Artist) +
   theme(legend.position = "none")
 
+
+#### PIERWSZE MIEJSCE I TOP-3 ####
 
 # najczęściej na 1 miejscu
 notowania_analiza %>%
@@ -272,7 +261,7 @@ notowania_analiza %>%
 
 
 # jednorazowe hity
-# był na 1 miejscu, ale tylko raz w top5
+# utwor był na 1 miejscu, ale tylko raz w top5
 notowania_analiza %>%
   filter(PozAkt <= 5) %>%
   count(Artist, Title, PozAkt) %>%
@@ -303,38 +292,44 @@ notowania_analiza %>%
                size = 3, show.legend = FALSE) +
   geom_text(aes(x=max_Data, y=Song, label=sprintf("%d dni (%d)", dni, n_notowan)),
             hjust = -0.1, vjust = 0.2, show.legend = FALSE) +
-  expand_limits(x = c(make_date(1982, 1, 1), make_date(2020, 1, 1))) +
-  labs(title = "Piosenki najdłużej znajdujące się na LP3",
-       x = "", y = "",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  expand_limits(x = c(make_date(1982, 1, 1), make_date(2020, 1, 1)))
+
 
 
 # średnia ocena vs ilość notowań na liście - per artysta
 # liczba piosenek artysty
-n_songs <- notowania_analiza %>% select(Artist, Title) %>% distinct() %>% count(Artist, sort = TRUE) %>% ungroup()
+n_songs <- notowania_analiza %>%
+  select(Artist, Title) %>%
+  distinct() %>%
+  count(Artist, sort = TRUE) %>%
+  ungroup()
 # średnia liczba punktów artysty
-m_punkty <- notowania_analiza %>% group_by(Artist) %>% summarise(m_Punkty = mean(Punkty)) %>% ungroup()
+m_punkty <- notowania_analiza %>%
+  group_by(Artist) %>%
+  summarise(m_Punkty = mean(Punkty)) %>%
+  ungroup()
 
-# średnia ocena vs ilość notowań na liście - per artysta
 left_join(n_songs, m_punkty, by = "Artist") %>%
   top_n(20, n) %>%
   ggplot() +
   geom_point(aes(n, m_Punkty, color=Artist), show.legend = FALSE) +
   geom_text_repel(aes(n, m_Punkty, label = Artist, color=Artist), show.legend = FALSE) +
   geom_hline(aes(yintercept = mean(m_Punkty)), color = "red") +
-  geom_vline(aes(xintercept = mean(n)), color = "red") +
-  labs(title = "Wykonawcy - Lista Przebojów Trójki",
-       x = "Liczba notowań", y = "Średnia liczba punktów w notowaniu",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  geom_vline(aes(xintercept = mean(n)), color = "red")
+
 
 
 # średnia ocena vs ilość notowań na liście - per piosenka
 # ile raz piosenka była na liście
-n_times_song <- notowania_analiza %>% count(Artist, Title) %>% ungroup()
+n_times_song <- notowania_analiza %>%
+  count(Artist, Title) %>%
+  ungroup()
 # średnia liczba punktów artysty
-m_punkty_song <- notowania_analiza %>% group_by(Artist, Title) %>% summarise(m_Punkty = mean(Punkty)) %>% ungroup()
+m_punkty_song <- notowania_analiza %>%
+  group_by(Artist, Title) %>%
+  summarise(m_Punkty = mean(Punkty)) %>%
+  ungroup()
 
-# średnia ocena vs ilość notowań na liście - per piosenka
 left_join(n_times_song, m_punkty_song,
           by = c("Artist"="Artist", "Title"="Title")) %>%
   top_n(30, n) %>%
@@ -345,14 +340,16 @@ left_join(n_times_song, m_punkty_song,
                        color=Artist),
                    show.legend = FALSE) +
   geom_hline(aes(yintercept = mean(m_Punkty)), color = "red") +
-  geom_vline(aes(xintercept = mean(n)), color = "red") +
-  labs(title = "Piosenki - Lista Przebojów Trójki",
-       x = "Liczba notowań", y = "Średnia liczba punktów w notowaniu",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  geom_vline(aes(xintercept = mean(n)), color = "red")
+
+
 
 
 # Licza notowań a liczba na pierwszym miejscu
-n_first <- notowania_analiza %>% filter(PozAkt == 1) %>% count(Artist, Title) %>% ungroup()
+n_first <- notowania_analiza %>%
+  filter(PozAkt == 1) %>%
+  count(Artist, Title) %>%
+  ungroup()
 
 left_join(n_times_song,
           n_first %>% rename(n_first=n),
@@ -360,10 +357,7 @@ left_join(n_times_song,
   filter(n_first >= 1) %>%
   ggplot() +
   geom_point(aes(n, n_first )) +
-  geom_smooth(aes(n, n_first), show.legend = FALSE) +
-  labs(title = "Lista Przebojów Trójki",
-       x = "Liczba notowań", y = "Liczba notowań na pierwszym miejscu",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  geom_smooth(aes(n, n_first), show.legend = FALSE)
 
 
 # dla tych co były najczęściej na pierwszym miejscu:
@@ -377,10 +371,7 @@ left_join(n_times_song,
                        label = sprintf("%s\n%s", Artist, Title),
                        color = Title),
                    max.iter = 50000, show.legend = FALSE) +
-  expand_limits(y = c(0, 20)) +
-  labs(title = "Lista Przebojów Trójki",
-       x = "Liczba notowań", y = "Liczba notowań na pierwszym miejscu",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  expand_limits(y = c(0, 20))
 
 
 # Jaki procent notowań dana piosenka była na pierwszym miejscu?
@@ -395,19 +386,12 @@ left_join(n_times_song,
   ggplot() +
   geom_bar(aes(Song, p), stat="identity", fill = "lightgreen", color = "black") +
   geom_hline(yintercept = c(0, 25, 50), color = "red") +
-  coord_flip() +
-  labs(title = "Lista Przebojów Trójki",
-       x = "", y = "% notowań na pierwszym miejscu",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  coord_flip()
 
 
 # Jak długo piosenki są na liście?
 ggplot(n_times_song) +
-  geom_histogram(aes(n), binwidth = 1, fill="lightgreen", color = "black") +
-  labs(title = "Jak długo piosenki są na Liście Przebojów Trójki?",
-       x = "Liczba notowań", y = "",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
-
+  geom_histogram(aes(n), binwidth = 1, fill="lightgreen", color = "black")
 
 
 # Ile czasu zajmuje dotarcie do pierwszego miejsca?
@@ -425,24 +409,17 @@ to_the_top <- notowania_analiza %>%
 
 to_the_top %>%
   ggplot() +
-  geom_histogram(aes(NotowanieN), binwidth = 1, fill="lightgreen", color = "black") +
-  labs(title = "Ile notowań piosenka znajduje się na pierwszym miejscu LP3?",
-       x = "Liczba notowań", y = "",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  geom_histogram(aes(NotowanieN), binwidth = 1, fill="lightgreen", color = "black")
 
 
 # Na pierwszym miejscu debiutowały:
 to_the_top %>%
   filter(NotowanieN == min(NotowanieN)) %>%
-  select(Artist, Title) %>%
-  knitr::kable()
+  select(Artist, Title)
 
 
-
-
-# Dodanie tagów z LastFM
+#### TAGI Z LASTFM ####
 library(RLastFM)
-lastkey <- "xxxxxxxxxxx" # wpisz SWÓJ!
 
 # unikalna lista piosenek - tego szukamy w LastFM
 piosenki <- notowania_analiza %>%
@@ -488,10 +465,8 @@ notowania_analiza %>%
   mutate(Tag=factor(Tag, levels = Tag)) %>%
   ggplot() +
   geom_bar(aes(Tag, Punkty), stat="identity", fill = "lightgreen", color = "black") +
-  theme(axis.text.x = element_text(angle=90, hjust=1)) +
-  labs(title = "Najpopularniejsze tagi na Liście Przebojów Trójki",
-       x = "", y = "Liczba punktów",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+
 
 # najpopularniejszy tag wg roku
 notowania_analiza %>%
@@ -508,7 +483,4 @@ notowania_analiza %>%
   ggplot() +
   geom_bar(aes(Rok, Punkty, fill=Tag), stat="identity", show.legend = FALSE) +
   geom_text(aes(Rok, Punkty, label=Tag), angle=90, hjust=-0.1) +
-  expand_limits(y = c(0, 11000)) +
-  labs(title = "Najpopularniejsze tagi na LP3 według roku",
-       x = "Rok", y = "Liczba punktów",
-       caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+  expand_limits(y = c(0, 11000))

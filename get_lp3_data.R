@@ -1,6 +1,9 @@
+# Skrypt pobiera dane o kolejnych notowaniach Listy Przebojów Trójki
+# Wynki to plik notowania_raw.RDS z zapisanymi notowaniami
+
 library(rvest)
 library(dplyr)
-
+library(lubridate)
 
 lp3_base_url <- "http://www.lp3.pl/alpt.phtml?m=1&nn="
 
@@ -11,7 +14,11 @@ notowania <- data.frame()
 # dla każdej kolejnej strony
 for(curr_nn in 1:max_nn) {
 
-  # bujujemy URL strony
+  # progress bar :)
+  cat(paste0("\r", curr_nn, " / ", max_nn))
+
+
+  # budujemy URL strony
   lp3_url <- paste0(lp3_base_url, curr_nn)
 
   # wczytujemy stronę
@@ -27,6 +34,7 @@ for(curr_nn in 1:max_nn) {
   notowanie_info <- gsub("[ ]+", " ", notowanie_info)
   notowanie_info <- unlist(strsplit(notowanie_info, "[ .]"))
 
+
   # tabela z notowaniem
   notowanie_tabela <- page %>%
     html_node("div#view-not") %>%
@@ -36,8 +44,10 @@ for(curr_nn in 1:max_nn) {
 
   colnames(notowanie_tabela) <- c("PozAkt", "PozPop", "TygNotowan", "Song", "Kraj", "Zmiana")
 
+
   # odrzucamy piosenki z poczekalni
   notowanie_tabela <- filter(notowanie_tabela, PozAkt!="poczekalnia")
+
 
   # czy coś zostało? zapisujemy potrzebne dane
   if(nrow(notowanie_tabela) > 0) {
@@ -72,12 +82,13 @@ notowania <- notowania %>%
   separate(Song, c("Artist", "Title"), sep = " — ", extra = "merge")
 
 # usuwamy zbędne spacje
-notowania_analiza$Title <- trimws(notowania_analiza$Title)
-notowania_analiza$Artist <- trimws(notowania_analiza$Artist)
+notowania$Title <- trimws(notowania$Title)
+notowania$Artist <- trimws(notowania$Artist)
+
 
 # modyfikujemy nazwę dla jednego wykonawcy - żeby ładnie mieściło się na wykresach
-notowania_analiza$Artist <- gsub("SPECIAL GUITAR PERFORMANCE BY ", "",
-                                 notowania_analiza$Artist, fixed = TRUE)
+notowania$Artist <- gsub("SPECIAL GUITAR PERFORMANCE BY ", "", notowania$Artist, fixed = TRUE)
+
 
 # zapisujemy dane do pliku
 saveRDS(notowania, file = "notowania_raw.RDS")
