@@ -2,7 +2,7 @@
 # Pobiera tez tagi z LastFM dla poszczegolnych utworow
 
 
-lastkey <- "43771275a50f206cf4a201256eec49fb" # wpisz SWÓJ!
+lastkey <- "xxxx" # wpisz SWÓJ!
 
 library(tidyverse)
 library(lubridate)
@@ -312,10 +312,10 @@ m_punkty <- notowania_analiza %>%
 left_join(n_songs, m_punkty, by = "Artist") %>%
   top_n(20, n) %>%
   ggplot() +
-  geom_point(aes(n, m_Punkty, color=Artist), show.legend = FALSE) +
-  geom_text_repel(aes(n, m_Punkty, label = Artist, color=Artist), show.legend = FALSE) +
   geom_hline(aes(yintercept = mean(m_Punkty)), color = "red") +
-  geom_vline(aes(xintercept = mean(n)), color = "red")
+  geom_vline(aes(xintercept = mean(n)), color = "red") +
+  geom_point(aes(n, m_Punkty, color=Artist), show.legend = FALSE) +
+  geom_text_repel(aes(n, m_Punkty, label = Artist, color=Artist), show.legend = FALSE)
 
 
 
@@ -334,13 +334,13 @@ left_join(n_times_song, m_punkty_song,
           by = c("Artist"="Artist", "Title"="Title")) %>%
   top_n(30, n) %>%
   ggplot() +
+  geom_hline(aes(yintercept = mean(m_Punkty)), color = "red") +
+  geom_vline(aes(xintercept = mean(n)), color = "red") +
   geom_point(aes(n, m_Punkty, color=Artist), show.legend = FALSE) +
   geom_label_repel(aes(n, m_Punkty,
                        label = sprintf("%s\n%s", Artist, Title),
                        color=Artist),
-                   show.legend = FALSE) +
-  geom_hline(aes(yintercept = mean(m_Punkty)), color = "red") +
-  geom_vline(aes(xintercept = mean(n)), color = "red")
+                   show.legend = FALSE)
 
 
 
@@ -419,6 +419,7 @@ to_the_top %>%
 
 
 #### TAGI Z LASTFM ####
+# https://cran.r-project.org/src/contrib/Archive/RLastFM/RLastFM_0.1-5.tar.gz
 library(RLastFM)
 
 # unikalna lista piosenek - tego szukamy w LastFM
