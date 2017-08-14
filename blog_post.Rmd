@@ -714,7 +714,7 @@ notowania_analiza %>%
 
 liczba punktów zdobytych przez poszcególne piosenki wybranych artystów (która piosenka była największym hitem)
 
-```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE, fig.height=10}
+```{r lp3_notowania_24, message=FALSE, warning=FALSE, error=FALSE, fig.height=10}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   group_by(Artist, Title) %>%
