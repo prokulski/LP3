@@ -684,5 +684,53 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
+Skumulowana liczba punktów per artysta
+
+```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
+nnotowania_analiza %>%
+  filter(Artist %in% top_artists) %>%
+  group_by(Artist) %>%
+  mutate(Punkty = cumsum(Punkty)) %>%
+  mutate(maxP = max(Punkty)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_line(aes(NotowanieData, Punkty, color=Artist))
+```
+
+
+liczba punktów zdobytych przez artystów w poszczególnych latach
+
+```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
+notowania_analiza %>%
+  filter(Artist %in% top_artists) %>%
+  mutate(Rok = year(NotowanieData)) %>%
+  group_by(Artist, Rok) %>%
+  mutate(Punkty = sum(Punkty)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_bar(aes(Rok, Punkty, fill=Artist), stat = "identity", show.legend = FALSE) +
+  facet_wrap(~Artist)
+```
+
+liczba punktów zdobytych przez poszcególne piosenki wybranych artystów (która piosenka była największym hitem)
+
+```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE, fig.height=10}
+notowania_analiza %>%
+  filter(Artist %in% top_artists) %>%
+  group_by(Artist, Title) %>%
+  summarise(Punkty = sum(Punkty)) %>%
+  ungroup() %>%
+  group_by(Artist) %>%
+  mutate(PunktyProc = 100*Punkty/sum(Punkty)) %>%
+  arrange(PunktyProc) %>%
+  top_n(10, Punkty) %>%
+  ungroup() %>%
+  mutate(Title = factor(Title, levels = Title)) %>%
+  ggplot() +
+  geom_bar(aes(Title, PunktyProc, fill=Artist), color = "black", stat = "identity", show.legend = FALSE) +
+  facet_wrap(~Artist, scales = "free_y", ncol = 1) +
+  coord_flip()
+```
+
 
 Dla zainteresowanych: [kod źródłowy w R na GitHubie](https://github.com/prokulski/LP3), **razem z danymi** (ale bez tagów z LastFM).
