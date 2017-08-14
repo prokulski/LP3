@@ -687,14 +687,28 @@ notowania_analiza %>%
 Skumulowana liczba punktów per artysta
 
 ```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
-nnotowania_analiza %>%
+notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   group_by(Artist) %>%
   mutate(Punkty = cumsum(Punkty)) %>%
-  mutate(maxP = max(Punkty)) %>%
   ungroup() %>%
   ggplot() +
   geom_line(aes(NotowanieData, Punkty, color=Artist))
+```
+
+
+Komu njszybciej urosło? czyi ten sam wykrest przebudowany tak, żeby wszystkie linie zaczynały sie w jednym punkcie.
+
+
+```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
+notowania_analiza %>%
+  filter(Artist %in% top_artists) %>%
+  group_by(Artist) %>%
+  mutate(Punkty = cumsum(Punkty)) %>%
+  mutate(NotowanieData_p = NotowanieData-min(NotowanieData)) %>%
+  ungroup() %>%
+  ggplot() +
+  geom_line(aes(NotowanieData_p, Punkty, color=Artist))
 ```
 
 
