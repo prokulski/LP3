@@ -5,3 +5,5 @@
 .Rproj
 ListaTrojki.Rproj
 RLastFM_0.1-5.tar.gz
+blog_post_files/*
+blog_post.html

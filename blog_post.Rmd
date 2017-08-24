@@ -31,6 +31,11 @@ theme_set(theme_minimal() +
 
 # Pobranie danych
 
+Skorzystamy z archiwum Listy Trójki zebranym na stronie [LP3.pl](http://www.lp3.pl/) - klikając w kolejne numery notowań po prawej stronie widzimy, że zmienia się adres strony według schematu http://www.lp3.pl/alpt.phtml?m=1&nn=XXX gdzie XXX to kolejny numer. Trzeba znaleźć największy numer i przejść przez kolejne strony (dla XXX od jeden do tej największej liczby).
+
+Analiza kodu HTML strony pozwala na wybranie odpowiednich jej fragmentów i tym samym zgromadzenie danych. Szczegółowym kodem nie będę zamęczał - znajduje się na [GitHubie](https://github.com/prokulski/LP3/blob/master/get_lp3_data.R)
+
+Swoją drogą na [LP3.pl](http://www.lp3.pl/) znajdziecie część z poniższych analiz.
 
 # Przygotowanie danych do dalszych analiz
 
@@ -61,7 +66,7 @@ notowania_analiza$Artist <- gsub("SPECIAL GUITAR PERFORMANCE BY ", "",
 
 # Analizy
 
-## pProwadzący notowania
+## Prowadzący notowania
 
 ```{r, message=FALSE, warning=FALSE, error=FALSE}
 prowadzacy <- notowania_analiza %>%
@@ -360,7 +365,7 @@ notowania_analiza %>%
 Komu njszybciej urosło? czyi ten sam wykrest przebudowany tak, żeby wszystkie linie zaczynały sie w jednym punkcie.
 
 
-```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_notowania_25, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   group_by(Artist) %>%
@@ -374,7 +379,7 @@ notowania_analiza %>%
 
 liczba punktów zdobytych przez artystów w poszczególnych latach
 
-```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_notowania_26, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   mutate(Rok = year(NotowanieData)) %>%
