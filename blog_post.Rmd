@@ -224,6 +224,7 @@ notowania_analiza %>%
 
 Przejdźmy do wykonawców.
 
+
 ## Wykonawcy
 
 Może być tak, że ktoś nagra hit, który zdobędzie popularność w krótkim czasie, a później nikt o nim nie pamięta. **Gotye** to idealny przykład (chociaż wolę podawać za przykład **Macarenę**).
@@ -282,7 +283,7 @@ top_artists <- c("U2", "HEY", "KULT", "MADONNA", "DEPECHE MODE",
 
 Teraz wybierzemy artystów, których piosenki były na liście przez co najmniej 15 lat i sprawdzimy ile punktów zdobyli (wszystkie ich piosenki) w poszczególnych latach. Da to jakiś obraz tego jak przebiegała historia popularności wykonawcy.
 
-```{r lp3_notowania_04, message=FALSE, warning=FALSE, error=FALSE, fig.height=12}
+```{r lp3_notowania_04, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    # liczba punktów artysty per rok
    mutate(Rok = year(NotowanieData)) %>%
@@ -313,7 +314,6 @@ notowania_analiza %>%
 
 Tym razem z punktów przeszliśmy na miejsce na liście (same punkty dałyby straszliwie rozstrzeloną skalę osi Y). Widzimy oczywiście, że niektórzy przestali pojawiać się na liście, a inni pokazali się dopiero w pewnym momencie.
 
-
 ### Wynik artysty dla kolejnych notowań
 
 Teraz coś podobnego (dla wybranej dwunastki najlepszych): suma punktów zdobytych w kolejnych notowaniach:
@@ -336,7 +336,6 @@ notowania_analiza %>%
 ```
 
 Kult swój szczyt miał w okolicy 1998-2000 roku, ostatnio jest znowu bardziej lubiany. Maanam się skończył, podobnie jak Republika (tutaj akurat nie jest to dziwne). Śmiem twierdzić, że Metallica zyskuje głównie przez sentyment i wiek głosujących - ci, którzy byli w liceum w czasie "Master of Puppets" albo "Czarnej płyty" głosują teraz na nowe utwory.
-
 
 ## Analiza poszczególnych artystów
 
@@ -579,7 +578,6 @@ left_join(n_songs, m_punkty, by = "Artist") %>%
 ```
 
 Górna lewa ćwiartka to w pewnym sensie fenomenalni artyści - prawie każda ich piosenka okazywała się hitem (było ich mniej, ale były wyżej). Górna prawa część to wyjadacze, sprawdzone maszyny - dużo numerów, dobrze odbieranych przez słuchaczy.
-
 
 Sprawdźmy coś podobnego dla konkretnych utworów:
 
