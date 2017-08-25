@@ -714,7 +714,7 @@ ggplot(n_times_song) +
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Średnio piosenka jest na liście przez `r round(mean(n_times_song$n), 1)` notowań, przy medianie `r median(n_times_song$n)`. Najdłużej (w sensie liczby notowań) było `r n_times_song[n_times_song$n == max(n_times_song$n), "Artist"]` z 'r n_times_song[n_times_song$n == max(n_times_song$n), "Title"]' ('r max(n_times_song$n)' razy).
+Średnio piosenka jest na liście przez `r round(mean(n_times_song$n), 1)` notowań, przy medianie `r median(n_times_song$n)`. Najdłużej (w sensie liczby notowań) było `r n_times_song[n_times_song$n == max(n_times_song$n), "Artist"]` z `r n_times_song[n_times_song$n == max(n_times_song$n), "Title"]` (`r max(n_times_song$n)` razy).
 
 
 ## Ile czasu zajmuje dotarcie do pierwszego miejsca?
