@@ -34,7 +34,7 @@ theme_set(theme_minimal() +
 
 ## Pobranie danych
 
-Skorzystamy z archiwum Listy Trójki zebranym na stronie [LP3.pl](http://www.lp3.pl/) - klikając w kolejne numery notowań po prawej stronie widzimy, że zmienia się adres strony według schematu http://www.lp3.pl/alpt.phtml?m=1&nn=XXX gdzie *XXX* to kolejny numer. Trzeba znaleźć największy numer (najnowsze notowanie) i przejść przez kolejne strony (dla *XXX* od jeden do tej największej liczby).
+Skorzystamy z archiwum Listy Trójki zebranym na stronie [LP3.pl](http://www.lp3.pl/) - klikając w kolejne numery notowań po prawej stronie widzimy, że zmienia się adres strony według schematu http://www.lp3.pl/alpt.phtml?m=1&nn=XXX gdzie *XXX* to kolejny numer (niekoniecznie notowania). Trzeba znaleźć największy numer (najnowsze notowanie) i przejść przez kolejne strony (kolejne *XXX* od jeden do tej największej liczby).
 
 Analiza kodu HTML strony pozwala na wybranie odpowiednich jej fragmentów i tym samym zgromadzenie danych. Szczegółowym kodem nie będę zamęczał - znajduje się na [GitHubie](https://github.com/prokulski/LP3/blob/master/get_lp3_data.R). Pojawiają się pytania od Was jak *scrappować* strony - być może przygotuję o tym kiedyś dedykowany wpis techniczny (choć wolę przygotowywać analizy :). Dane zapisałem w pliku lokalnym.
 
@@ -42,7 +42,7 @@ Swoją drogą na [LP3.pl](http://www.lp3.pl/) znajdziecie część z poniższych
 
 ## Przygotowanie danych do dalszych analiz
 
-Pod uwagę weźmiemy tylko piosenki z pełnego notowania (miejsca 1-30, z pominięciem *poczekalnii*). Aby było sprawiedliwie na przestrzeni całej historii zamiast miejsc na liście użyjemy punktacji, którą sami nadamy: 30 punktów za pierwsze miejsce, 29 za drugie itd.
+Pod uwagę weźmiemy tylko piosenki z pełnego notowania (miejsca 1-30, z pominięciem *poczekalnii*). Aby było sprawiedliwie na przestrzeni całej historii zamiast miejsc na liście użyjemy punktacji, którą sami nadamy: 30 punktów za pierwsze miejsce, 29 za drugie itd. Tak samo nadawane są punkty podczas rocznych podsumowań Listy.
 
 
 ```{r, message=FALSE, warning=FALSE, error=FALSE, eval=FALSE}
@@ -74,7 +74,7 @@ Mając tak przygotowane dane możemy przejść do tego, co najciekawsze.
 
 Każde notowanie w serwisie LP3.pl to nie tylko informacje o pozycji konkretnych piosenek, ale też jego numer, data i osoba prowadząca. Lista Trójki kojarzy się przede wszystkim z Markiem Niedźwieckim. Zobaczmy jak dużo notowań prowadził:
 
-```{r lp3_prowadzacy_01, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_01, message=FALSE, warning=FALSE, error=FALSE, fig.height=6}
 prowadzacy <- notowania_analiza %>%
    select(NotowanieData, NotowanieProwadzacy) %>%
    distinct()
@@ -93,9 +93,9 @@ prowadzacy %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Zdecydowaną większość. A jak wyglądał podział notowań w roku pomiędzy poszczególnych prowadzących? Wybieramy tylko tych, którzy prowadzili najwięcej, resztę wrzucimy do worka "inni"
+Zdecydowaną większość. A **jak wyglądał podział notowań w roku pomiędzy poszczególnych prowadzących?** Wybieramy tylko tych, którzy prowadzili najwięcej, resztę wrzucimy do worka "inni":
 
-```{r lp3_prowadzacy_02, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_02, message=FALSE, warning=FALSE, error=FALSE}
 prowadzacy %>%
    mutate(Rok=year(NotowanieData), NotowanieProwadzacy = as.character(NotowanieProwadzacy)) %>%
    mutate(NotowanieProwadzacy = ifelse(NotowanieProwadzacy %in% c("brak emisji", "Piotr Baron", "Roman Rogowiecki", "Piotr Metz", "Piotr Stelmach", "Marek Niedźwiecki"),
@@ -117,17 +117,17 @@ prowadzacy %>%
     scale_fill_manual(values = RColorBrewer::brewer.pal(7, "Set3"))
 ```
 
-Widać, że w 2007 roku Marka zastąpił Piotr Baron. Niedźwiecki wrócił do Listy w 2010 roku. I to się zgadza, bo przez pewien czas Niedźwiecki pracował w Radiu Złote Przeboje.
+Widać, że w 2007 roku Marka zastąpił Piotr Baron. Niedźwiecki wrócił do Listy w 2010 roku i od tego czasu Listę prowadzi na zmianę z Baronem (plus sporadycznie innymi osobami, głównie Piotrem Metzem). I to się zgadza, bo przez pewien czas (od grudnia 2007 do końca marca 2010) Niedźwiecki pracował w Radiu Złote Przeboje.
 
-Lista przebojów wykreowała osobowości radiowe, ale lista to przede wszystkim piosenki. Przyjżyjmy się więc im.
+Lista przebojów wykreowała osobowości radiowe, ale Lista to przede wszystkim piosenki. Przyjżyjmy się więc im.
 
 ## Piosenki
 
 ### Najpoularniejsze piosenki (top wszech czasów)
 
-Jaka piosenka była tą najlepszą w prawie 30 latach? Może ta, która najczęściej była na pierwszym miejscu? A co z tymi, które były ciągle drugie? Dlatego właśnie użyjemy punktów. Utwór mógł być na liście bardzo długo, a nigdy nie dotrzeć na szczyt - to oznacza, że był popularny i lubiany, a nie miał szczęścia.
+**Jaka piosenka była tą najlepszą w prawie 30 latach?** Może ta, która najczęściej była na pierwszym miejscu? A co z tymi, które były ciągle drugie? Dlatego właśnie użyjemy punktów. Utwór mógł być na liście bardzo długo, a nigdy nie dotrzeć na szczyt - to oznacza, że był popularny i lubiany, a nie miał szczęścia.
 
-```{r lp3_prowadzacy_03, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_03, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    group_by(Artist, Title) %>%
    summarise(Punkty = sum(Punkty)) %>%
@@ -144,14 +144,14 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Bezapelacyjnie króluje piosenka Queenu.
+Bezapelacyjnie króluje piosenka Queenu. Zwróćcie uwagę na piosenkę Gotye - będzie o niej trochę dalej.
 
 
 ### Najpopularniejsze polskie piosenki 
 
-Powyżej pojawiło się kilka polskich utoworów, ale zobaczmy pełne top 30:
+Powyżej pojawiło się kilka polskich utoworów, ale zobaczmy pełne polskie top 30:
 
-```{r lp3_notowania_01, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_04, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    filter(Kraj == "PL") %>%
    group_by(Artist, Title) %>%
@@ -169,13 +169,13 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Niesamowite jest to, że piosenka stosunkowo "młoda" (jak na historię listy) znalazła się na trzecim miejscu. I jakże inna jest to piosenka w porównaniu z Perfectem - to już inne pokolenie słuchaczy.
+Niesamowite jest to, że piosenka stosunkowo "młoda" (jak na historię listy) znalazła się na trzecim miejscu. I jakże inna jest to piosenka w porównaniu z Perfectem - to już inne pokolenie słuchaczy. Warto zwrócić również uwagę na "Wojenkę" Lao Che.
 
 ### Najpopularniejsze piosenki roku
 
-Sprawdźmy teraz jakie były hity rok po roku:
+Sprawdźmy teraz jakie były **hity rok po roku**:
 
-```{r lp3_notowania_05, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_05, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    mutate(Rok=year(NotowanieData)) %>%
    group_by(Rok, Artist, Title) %>%
@@ -200,7 +200,7 @@ notowania_analiza %>%
 
 I jeszcze to samo dla samych polskich utworów:
 
-```{r lp3_notowania_06, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_06, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    filter(Kraj=="PL") %>%
    mutate(Rok=year(NotowanieData)) %>%
@@ -227,11 +227,11 @@ Przejdźmy do wykonawców.
 
 ## Wykonawcy
 
-Może być tak, że ktoś nagra hit, który zdobędzie popularność w krótkim czasie, a później nikt o nim nie pamięta. **Gotye** to idealny przykład (chociaż wolę podawać za przykład **Macarenę**).
+Może być tak, że ktoś nagra hit, który zdobędzie popularność w krótkim czasie, a później nikt o nim nie pamięta. **Gotye** to idealny przykład (chociaż wolę podawać za przykład **Macarenę**, która swego czasu pobiła rekord ilości notowań na szcycie Billboardu).
 
 ### Najpopularniejszy artysta listy
 
-```{r lp3_notowania_02, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_07, message=FALSE, warning=FALSE, error=FALSE, fig.height=6}
 notowania_analiza %>%
    group_by(Artist) %>%
    summarise(Punkty = sum(Punkty)) %>%
@@ -247,13 +247,14 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Tutaj widać gust muzyczny słuchaczy Trójki. I jakże on się różni od najpopularniejszych piosenek! Queen jest dopiero 28, chociaż wygrał w kategorii najlepszy utwór. Widać więc, że liczy się nie tyle jedna piosenka co cały ich zestaw, najlepiej przez wiele lat.
+Tutaj widać gust muzyczny słuchaczy Trójki. I jakże on się różni od najpopularniejszych piosenek! Queen jest dopiero 28, chociaż wygrał w kategorii najlepszy utwór. Widać więc, że liczy się nie tyle jedna piosenka co cały ich zestaw, najlepiej przez wiele lat. Queen nie miał tego szczęścia - Freddie zmarł w 1991 roku i od tego czasu Queenu właściwie nie ma. Kolejne piosenki zapewne poprawiłyby wynik zespołu. Podobnie jest z polską Republiką - również ustąpiła miejsca innym po śmierci Ciechowskiego. Ehh... o każdym z tych wykonawców mógłbym długo i namiętnie. Cóż, kocham muzykę i jest chyba najważniejszą dziedziną sztuki dla mnie.
+
 
 ### Najpopularniejszy polski artysta całej listy
 
 Tradycyjnie sprawdźmy najlepszych polskich wykonawców:
 
-```{r lp3_notowania_03, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_08, message=FALSE, warning=FALSE, error=FALSE, fig.height=6}
 notowania_analiza %>%
    filter(Kraj=="PL") %>%
    group_by(Artist) %>%
@@ -283,7 +284,7 @@ top_artists <- c("U2", "HEY", "KULT", "MADONNA", "DEPECHE MODE",
 
 Teraz wybierzemy artystów, których piosenki były na liście przez co najmniej 15 lat i sprawdzimy ile punktów zdobyli (wszystkie ich piosenki) w poszczególnych latach. Da to jakiś obraz tego jak przebiegała historia popularności wykonawcy.
 
-```{r lp3_notowania_04, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_09, message=FALSE, warning=FALSE, error=FALSE, fig.height=16}
 notowania_analiza %>%
    # liczba punktów artysty per rok
    mutate(Rok = year(NotowanieData)) %>%
@@ -312,13 +313,13 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Tym razem z punktów przeszliśmy na miejsce na liście (same punkty dałyby straszliwie rozstrzeloną skalę osi Y). Widzimy oczywiście, że niektórzy przestali pojawiać się na liście, a inni pokazali się dopiero w pewnym momencie.
+Tym razem z punktów przeszliśmy na miejsce na liście (same punkty dałyby straszliwie rozstrzeloną skalę osi Y). Widzimy oczywiście, że niektórzy przestali pojawiać się na liście, a inni pokazali się dopiero w pewnym momencie (Coldplay, Hey, Myslovitz).
 
 ### Wynik artysty dla kolejnych notowań
 
-Teraz coś podobnego (dla wybranej dwunastki najlepszych): suma punktów zdobytych w kolejnych notowaniach:
+Teraz coś podobnego (dla wybranej dwunastki najlepszych) - suma punktów zdobytych w kolejnych notowaniach:
 
-```{r lp3_notowania_07, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_10, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    filter(Artist %in% top_artists) %>%
    group_by(NotowanieData) %>%
@@ -335,7 +336,9 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Kult swój szczyt miał w okolicy 1998-2000 roku, ostatnio jest znowu bardziej lubiany. Maanam się skończył, podobnie jak Republika (tutaj akurat nie jest to dziwne). Śmiem twierdzić, że Metallica zyskuje głównie przez sentyment i wiek głosujących - ci, którzy byli w liceum w czasie "Master of Puppets" albo "Czarnej płyty" głosują teraz na nowe utwory.
+Wykresy są bardziej "dynamiczne" w pionie - przeliczenie punktów na kolejność na liście spłaszczyło wykresy.
+
+Kult swój szczyt miał w okolicy 1998-2000 roku, ostatnio jest znowu bardziej lubiany. Maanam się skończył, podobnie jak Republika (tutaj akurat nie jest to dziwne). Śmiem twierdzić, że Metallica zyskuje głównie przez sentyment i wiek głosujących - ci, którzy byli w liceum w czasie "Master of Puppets" albo *czarnej płyty* głosują teraz na nowe utwory (które na ostatniej płycie są całkiem całkiem).
 
 ## Analiza poszczególnych artystów
 
@@ -343,7 +346,7 @@ Przyjżyjmy się historii wybranego artysty na przestrzeni lat. Wybrałem Maanam
 
 ### Najpopularniejsze piosenki w danym roku
 
-```{r lp3_notowania_08, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_11, message=FALSE, warning=FALSE, error=FALSE}
 artysta <- "MAANAM"
 
 notowania_analiza %>%
@@ -369,13 +372,13 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Dlaczgo "Luciola '99" występuje w 1999 i 2000 roku? Pewnie weszła do notowania pod koniec 1999 i jednocześnie była jedyną (albo najlepszą) piosenką Maanamu w tym roku. W 2000 była na liście dłużej (niż w 1999) i zapewne też wyżej.
+Dlaczego "Luciola '99" występuje w 1999 i 2000 roku? Pewnie weszła do notowania pod koniec 1999 i jednocześnie była jedyną (albo najlepszą) piosenką Maanamu w tym roku - zerknięcie w dane pokazuje, że zadebiutowała 3 grudnia 1999 (załapała się na 4 notowania w 1999), z listy wypadła w marcu 2000. W 2000 była na liście dłużej (niż w 1999) i wyżej (najwyżej na 8 miejscy w styczniu 2000).
 
 Sprawdźmy jak poszczególni wykonawcy zdobywali popularność (albo raczej punkty na liście):
 
 ### Skumulowana liczba punktów per wykonawca
 
-```{r lp3_notowania_21, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_12, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   group_by(Artist) %>%
@@ -388,10 +391,9 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Najwyżej jak do tej pory jest U2. Hey i Kult w ostatnich kilku latach idą łeb w łeb mijając się na drugim i trzecim miejscu. Ale ten wykres jest nieco mylący - nie widać tempa zmian, bo poszczególne linie zaczynają się w różnych momentach. Zróbmy tak, żeby wszystkie linie zaczynały się w tym samym miejscu:
+Najwyżej jak do tej pory jest U2. Hey i Kult w ostatnich kilku latach idą łeb w łeb mijając się na drugim i trzecim miejscu. Ale ten wykres jest nieco mylący: nie widać tempa zmian, bo poszczególne linie zaczynają się w różnych momentach. Zróbmy tak, żeby wszystkie linie zaczynały się w tym samym miejscu:
 
-
-```{r lp3_notowania_25, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_13, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   group_by(Artist) %>%
@@ -405,13 +407,13 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-I tutaj widać ciekawostkę: Hey potrzebował mniej więcej rok mniej niż Kult aby dojść do tego samego poziomu. I jeśli Hey będzie podążał tą samą drogą to z rok, może dwa przebije U2.
+I tutaj widać ciekawostkę: Hey potrzebował mniej więcej rok mniej niż Kult aby dojść do tego samego poziomu. I jeśli Hey będzie podążał tą samą drogą to za rok, może dwa przebije U2 (o ile U2 nie zrobi kilku hiciorów, a nowa płyta ponoć 1 grudnia tego roku, pierwszy singiel już za kilkanaście dni).
 
 ### Najlepsze lata wykonawców
 
 Możemy zobaczyć jak wyglądała liczba punktów zdobytych przez artystów w poszczególnych latach - to daje obraz tego, kiedy artyści byli "na fali".
 
-```{r lp3_notowania_26, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_14, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   mutate(Rok = year(NotowanieData)) %>%
@@ -420,14 +422,20 @@ notowania_analiza %>%
   ungroup() %>%
   ggplot() +
   geom_bar(aes(Rok, Punkty, fill=Artist), stat = "identity", show.legend = FALSE) +
-  facet_wrap(~Artist)
+  facet_wrap(~Artist) +
+   labs(x = "Rok", y = "Punkty", 
+        caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
+
+Hey świetnie zadebiutował i pociągnął passę pierwszymi płytami (było notowanie, gdzie "Dreams" i "Teksański" były w pierwszej trójce, później "Misie", "Ja sowa" i "Ho"), teraz wracają (płytą, która do mnie nie dociera - chyba za mało słucham nowości, a ciągle wierzę w to, że najlepsze płyty najtrudniej wchodzą).
+
+Maanam i Republika to najlepsze polskie kapele tal 80, bezapelacyjnie. Depeche Mode pozamiatało 2006 rok głównie singlem "Martyr" oraz "John the Revelator". U2 to z kolei wielki sukces płyty "POP" (po "Achtung baby!" moja ulubiona, a słabo znana wśród znajomych) i singlem "Sweetest Thing". Kult najwięcej zgarnął za piosenki z "Ostatecznego krachu systemu korporacji".
 
 ### Największe hity wykonawców
 
-Zobaczmy jeszcze liczbę punktów zdobytych przez poszczególne piosenki wybranych artystów - która piosenka była największym hitem?
+Zobaczmy jeszcze liczbę punktów zdobytych przez poszczególne piosenki wybranych artystów - **która piosenka była największym hitem?**
 
-```{r lp3_notowania_24, message=FALSE, warning=FALSE, error=FALSE, fig.height=18}
+```{r lp3_15, message=FALSE, warning=FALSE, error=FALSE, fig.height=18}
 notowania_analiza %>%
   filter(Artist %in% top_artists) %>%
   group_by(Artist, Title) %>%
@@ -442,7 +450,9 @@ notowania_analiza %>%
   ggplot() +
   geom_bar(aes(Title, PunktyProc, fill=Artist), color = "black", stat = "identity", show.legend = FALSE) +
   facet_wrap(~Artist, scales = "free_y", ncol = 1) +
-  coord_flip()
+  coord_flip() +
+   labs(y = "% punktów zgromadzonych przez wykonawcę", x = "",
+        caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
 
@@ -464,9 +474,9 @@ notowania_analiza %>%
    knitr::kable()
 ```
 
-Wygrywa **Gotye**. Jednorazowy hicior był najczęściej na pierwszym miejscu w całej historii listy Trójki. Bijąc na głowę (4 notowania więcej na pierwszym miejscu) najlepszą piosenkę listy ("These Are the Days of Our Lives").
+Wygrywa **Gotye**. Jednorazowy hicior był najczęściej na pierwszym miejscu w całej historii Listy Trójki. Bijąc na głowę (4 notowania więcej na pierwszym miejscu) najlepszą piosenkę Listy ("These Are the Days of Our Lives").
 
-Ale czy pierwsze miejsce to jest jakiś wyznacznik? Może trzeba policzyć pierwszą trójkę?
+Ale czy pierwsze miejsce to jest jakiś wyznacznik? Wspominałem Makarenę. Może trzeba policzyć pierwszą trójkę?
 
 ### Najczęściej w Top3
 
@@ -486,9 +496,9 @@ notowania_analiza %>%
    knitr::kable()
 ```
 
-Tutaj sytuacja jest już bardziej wyprostowana. Zaskakują wysokie pozycje dwóch nowych piosenek Depeche Mode oraz Rojek, Lao Che i Organek. "Brothers in Arms", która to piosenka jest zazwyczaj w Top 3 "Topu wszech czasów" w pierwszej trójce kolejnych notowań była tylko 15 razy
+Tutaj sytuacja jest już bardziej wyprostowana. Zaskakują wysokie pozycje dwóch nowych piosenek Depeche Mode oraz Rojek, Lao Che i Organek. "Brothers in Arms", która jest zazwyczaj w top 3 każdego "Topu wszech czasów" w pierwszej trójce kolejnych notowań była tylko 15 razy.
 
-Czy są jakieś jednorazowe hity? Czyli takie piosenki, które wpadły na szczyt, ale tylko raz (na szczycie właśnie) były w pierwszej piątce?
+**Czy są jakieś jednorazowe hity?** Czyli takie piosenki, które wpadły na szczyt, ale tylko raz (na szczycie właśnie) były w pierwszej piątce?
 
 ```{r, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
@@ -509,7 +519,7 @@ Kto był
 
 Przy okazji: poniższy kod nadaje się doskonale do rysowania wykresów Gantta.
 
-```{r lp3_notowania_11, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_16, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    group_by(Artist, Title) %>%
    mutate(min_Data = min(NotowanieData), max_Data = max(NotowanieData), n_notowan = n()) %>%
@@ -533,15 +543,18 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Odrzućmy pierwsze trzy (były na liście przez kilka tygodni, wypadały i wracały na listę po kilku latach - stąd takie wyniki) i przyjrzyjmy się kolejnym pozycjom dla czwartej piosenki:
+W nawiasie liczba notowań, w których dany utwór wystąpił.
 
-```{r lp3_notowania_23, message=FALSE, warning=FALSE, error=FALSE}
+Odrzućmy pierwsze trzy (były na liście przez kilka tygodni, wypadały i wracały na listę po kilku latach - stąd takie wyniki) i przyjżyjmy się kolejnym pozycjom dla czwartej piosenki:
+
+```{r lp3_17, message=FALSE, warning=FALSE, error=FALSE, fig.height=6}
 artysta <- "ARCHIVE"
 piosenka <- "Again"
 
 notowania_analiza %>%
    filter(Artist==artysta, Title==piosenka) %>%
    ggplot() +
+   geom_hline(yintercept = 1, color = "blue") +
    geom_line(aes(NotowanieData, PozAkt)) +
    geom_point(aes(NotowanieData, PozAkt, col=PozAkt), size=5) +
    scale_color_gradient(low="red", high="black") +
@@ -553,12 +566,32 @@ notowania_analiza %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-W domu proszę zrobić to samo dla Gotye :)
+To samo dla Gotye:
+
+```{r lp3_18, message=FALSE, warning=FALSE, error=FALSE, echo=FALSE, fig.height=6}
+artysta <- "GOTYE FEAT. KIMBRA"
+piosenka <- "Somebody That I Used to Know"
+
+notowania_analiza %>%
+   filter(Artist==artysta, Title==piosenka) %>%
+   ggplot() +
+   geom_hline(yintercept = 1, color = "blue") +
+   geom_line(aes(NotowanieData, PozAkt)) +
+   geom_point(aes(NotowanieData, PozAkt, col=PozAkt), size=5) +
+   scale_color_gradient(low="red", high="black") +
+   ylim(30,0) +
+   theme(legend.position = "none") +
+   labs(title = paste0(artysta, " - ", piosenka),
+        x = "Data notowania",
+        y = "Pozycja na liście",
+        caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
+```
+
 
 
 Spróbujmy czegoś więcej: przygotujmy jakieś wskaźniki. Na przykład jak wygląda (i czy jest) wpływ liczby piosenek na liście z osiągniętą średnią liczbą punktów.
 
-```{r lp3_notowania_12, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_19, message=FALSE, warning=FALSE, error=FALSE}
 # liczba piosenek artysty
 n_songs <- notowania_analiza %>% select(Artist, Title) %>% distinct() %>% count(Artist, sort = TRUE) %>% ungroup()
 # średnia liczba punktów artysty
@@ -577,11 +610,11 @@ left_join(n_songs, m_punkty, by = "Artist") %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Górna lewa ćwiartka to w pewnym sensie fenomenalni artyści - prawie każda ich piosenka okazywała się hitem (było ich mniej, ale były wyżej). Górna prawa część to wyjadacze, sprawdzone maszyny - dużo numerów, dobrze odbieranych przez słuchaczy.
+Górna lewa ćwiartka to w pewnym sensie fenomenalni artyści: prawie każda ich piosenka okazywała się hitem (było ich mniej, ale były wyżej). Górna prawa część to wyjadacze, sprawdzone maszyny - dużo numerów, dobrze odbieranych przez słuchaczy.
 
 Sprawdźmy coś podobnego dla konkretnych utworów:
 
-```{r lp3_notowania_13, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_20, message=FALSE, warning=FALSE, error=FALSE}
 # ile raz piosenka była na liście
 n_times_song <- notowania_analiza %>% count(Artist, Title) %>% ungroup()
 # średnia liczba punktów piosenki
@@ -609,7 +642,7 @@ left_join(n_times_song, m_punkty_song,
 
 Czy im dłużej piosenka jest na liście tym większe ma szanse na pierwsze miejsce?
 
-```{r lp3_notowania_14, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_21, message=FALSE, warning=FALSE, error=FALSE}
 n_first <- notowania_analiza %>% filter(PozAkt == 1) %>% count(Artist, Title) %>% ungroup()
 
 left_join(n_times_song,
@@ -624,9 +657,10 @@ left_join(n_times_song,
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-dla tych co były najczęściej na pierwszym miejscu:
 
-```{r lp3_notowania_15, message=FALSE, warning=FALSE, error=FALSE}
+Dla tych co były najczęściej na pierwszym miejscu:
+
+```{r lp3_22, message=FALSE, warning=FALSE, error=FALSE}
 left_join(n_times_song,
           n_first %>% rename(n_first=n),
           by = c("Artist"="Artist", "Title"="Title")) %>%
@@ -643,12 +677,14 @@ left_join(n_times_song,
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
+Nie powiedziałbym, że istnieje taka zależność. Można być na Liście długo i nie trafić na pierwsze miejsce.
+
+
 Te same dane można przedstawić niego inaczej, czyli
 
 ### Jaki procent notowań dana piosenka była na pierwszym miejscu?
 
-
-```{r lp3_notowania_16, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_23, message=FALSE, warning=FALSE, error=FALSE}
 left_join(n_times_song,
           n_first %>% rename(n_first=n),
           by = c("Artist"="Artist", "Title"="Title")) %>%
@@ -661,7 +697,7 @@ left_join(n_times_song,
    geom_bar(aes(Song, p), stat="identity", fill = "lightgreen", color = "black") +
    geom_hline(yintercept = c(0, 25, 50), color = "red") +
    coord_flip() +
-   labs(title = "Lista Przebojów Trójki",
+   labs(title = "Ile notowań na pierwszym miejscu?",
         x = "", y = "% notowań na pierwszym miejscu",
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
@@ -670,7 +706,7 @@ Tutaj Lao Che (ze świetną piosenką) pobiło Gotye. Najlepszy utwór (piosenka
 
 ## Jak długo piosenki są na liście?
 
-```{r lp3_notowania_17, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_24, message=FALSE, warning=FALSE, error=FALSE}
 ggplot(n_times_song) +
    geom_histogram(aes(n), binwidth = 1, fill="lightgreen", color = "black") +
    labs(title = "Jak długo piosenki są na Liście Przebojów Trójki?",
@@ -678,12 +714,12 @@ ggplot(n_times_song) +
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Średnio piosenka jest na liście przez `r round(mean(n_times_song$n), 1)` notowań, przy medianie `r median(n_times_song$n)`
+Średnio piosenka jest na liście przez `r round(mean(n_times_song$n), 1)` notowań, przy medianie `r median(n_times_song$n)`. Najdłużej (w sensie liczby notowań) było `r n_times_song[n_times_song$n == max(n_times_song$n), "Artist"]` z 'r n_times_song[n_times_song$n == max(n_times_song$n), "Title"]' ('r max(n_times_song$n)' razy).
 
 
 ## Ile czasu zajmuje dotarcie do pierwszego miejsca?
 
-```{r lp3_notowania_18, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_25, message=FALSE, warning=FALSE, error=FALSE}
 to_the_top <- notowania_analiza %>%
    select(Artist, Title, PozAkt, NotowanieData) %>%
    group_by(Artist, Title) %>%
@@ -704,12 +740,12 @@ to_the_top %>%
         caption = "(c) Łukasz Prokulski, fb.com/DaneAnalizy")
 ```
 
-Średnio piosenka dociera do pierwszego miejsca po  `r round(mean(to_the_top$NotowanieN), 1)` notowaniach przy medianie `r median(to_the_top$NotowanieN)`. 3/4 piosenek robi to w `r quantile(to_the_top$NotowanieN, 0.75)` notowań, zaś najdłużej zajęło to (`r max(to_the_top$NotowanieN)` notowań) `r to_the_top[to_the_top$NotowanieN == max(to_the_top$NotowanieN), "Artist"]` - `r to_the_top[to_the_top$NotowanieN == max(to_the_top$NotowanieN), "Title"]`
+Średnio piosenka dociera do pierwszego miejsca po `r round(mean(to_the_top$NotowanieN), 1)` notowaniach przy medianie `r median(to_the_top$NotowanieN)`. 3/4 piosenek robi to w `r quantile(to_the_top$NotowanieN, 0.75)` notowań, zaś najdłużej zajęło to (`r max(to_the_top$NotowanieN)` notowań) `r to_the_top[to_the_top$NotowanieN == max(to_the_top$NotowanieN), "Artist"]` - `r to_the_top[to_the_top$NotowanieN == max(to_the_top$NotowanieN), "Title"]`
 
 
 Zobaczmy historię tego Stinga:
 
-```{r lp3_notowania_22, message=FALSE, warning=FALSE, error=FALSE, echo=FALSE}
+```{r lp3_26, message=FALSE, warning=FALSE, error=FALSE, echo=FALSE, fig.height=6}
 artysta <- "STING"
 piosenka <- "Fragile"
 
@@ -788,7 +824,7 @@ Mając otagowane kolejne piosenki możemy zobaczyć jaki był
 
 ### najpopularniejszy tag
 
-```{r lp3_notowania_19, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_27, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    group_by(Tag) %>%
    summarise(Punkty=sum(Punkty)) %>%
@@ -808,7 +844,7 @@ oraz
 
 ### najpopularniejszy tag w poszczególnych latach
 
-```{r lp3_notowania_20, message=FALSE, warning=FALSE, error=FALSE}
+```{r lp3_28, message=FALSE, warning=FALSE, error=FALSE}
 notowania_analiza %>%
    mutate(Rok=year(NotowanieData)) %>%
    group_by(Rok, Tag) %>%
